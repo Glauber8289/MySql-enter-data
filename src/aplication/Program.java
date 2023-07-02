@@ -24,7 +24,7 @@ public class Program {
 		try {
 			conn = DB.getConnection();
 			
-			conn.setAutoCommit(falsee);
+			conn.setAutoCommit(falseee);
 			
 			
 			st= conn.createStatement();
