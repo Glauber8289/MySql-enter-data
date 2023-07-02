@@ -11,52 +11,52 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import db.DB;
+import db.DbException;
+import db.DbIntegrityException;
 
 public class Program {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		
-		SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
-		Connection conn= null;
-		PreparedStatement st = null;
+		Connection conn = null;
+		Statement st = null;
 		
 		try {
 			conn = DB.getConnection();
 			
-			st = conn.prepareStatement(
-					"INSERT INTO seller "
-					+ "(Name,Email,BirthDate,BaseSalary,DepartmentId) "
-					+ "VALUES "		
-					+ "(?,?,?,?,?)",
-					Statement.RETURN_GENERATED_KEYS);
+			conn.setAutoCommit(falsee);
 			
-			st.setString(1, "Joao dos Santos");
-			st.setString(2, "JoaodosSantos@gmail.com");
-			st.setDate(3, new java.sql.Date(sdf.parse("17/03/1992").getTime()));
-			st.setDouble(4, 3000);
-			st.setInt(5, 4);
 			
-		int rowsAffected=st.executeUpdate();
-		if (rowsAffected > 0) {
-			ResultSet rs= st.getGeneratedKeys();
-			while (rs.next()) {
-				int id = rs.getInt(1);
-				System.out.println("Feito! ID = " + id);
+			st= conn.createStatement();
+					int rows1 = st.executeUpdate("UPDATE seller SET BaseSalary = 2090 "
+							+ "WHERE "
+							+ "DepartmentId=1" );
+			int x = 1;
+			//if (x<2) {
+			//	throw new SQLException("Fake error");
+			//}
+			
+			int rows2 = st.executeUpdate("UPDATE seller SET BaseSalary = 3090 "
+					+ "WHERE "
+					+ "DepartmentId=2" );
+			
+			conn.commit();
+			
+			System.out.println("Linha 1 " + rows1);
+			System.out.println("Linha 2 " + rows2);
 				
-			}
-		}else {
-			System.out.println("Nenhuma linha foi alterada!");
-		}
-		System.out.println("Feito! Linhas afetadas " + rowsAffected);
 			
 			
 		}
 		catch (SQLException e) {
-			e.printStackTrace();
-		}
-		catch (ParseException e) {
-			e.printStackTrace();
+			try {
+				conn.rollback();
+				throw new DbException("Transação não concluida, erro causado por "+ e.getMessage());
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+				throw new DbException("Erro ao tentar voltar a transação,erro causado por "+ e1.getMessage());
+			}
 		}
 		finally {
 			DB.closeStatement(st);
